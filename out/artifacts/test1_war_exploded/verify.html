@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>在线验证</title>
+    <link rel="stylesheet" href="css/apply.css">
+    <link rel="icon" href="image/apply.png">
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/jsencrypt.js"></script>
+    <script src="js/crypto-js/crypto-js.js"></script>
+    <script src="js/base64.js"></script>
+    <script src="js/AES.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
+    <script>
+
+        var publickey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAioCslqlD6fXtBDvnvAyIo3VlqjbYEdf1gl/piZ7DNLB6wL4xrQerNNXQ83gzMsij64LkPHjaChY4F+vmFDl3JOJJeSzB20NK9NQ6ifQgVD9iFyBtuiaYSj/KtWFRWjXXtoJEu1OzMvliaGxOrZRTYr0d2S74JcxQHKVQGvajzKo4EaAgyai7R9jFL0gK7/SdX2t+dtTGL7ocxoMcoh5+ivbaZTjMv0Uu6ARfAnFRpDwxDfZyTn7YQxqlsaHrAaHG8jeBL1Rsip+H5CINnOApOnKNbiuxx9if7G+W+fO26iqYWUoBDAFoDpjJecQr474lyHU6hNywVzi4MiZKGcO6mwIDAQAB";
+
+        $(function (){
+            $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+        })
+
+        $(function (){
+            $("#reset").click(function (){
+                $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+            })
+        })
+
+        $(function (){
+            var button = $("#button");
+            button.click(function (){
+                var checkcode = $("#checkcode");
+                var time = (new Date()).getTime();
+                var cert = $("#cert");
+                var formdata = new FormData();
+                var reg = /^[A-Za-z0-9]{4}$/;
+                if(!reg.test(checkcode.val()) || cert[0].files[0] == undefined){
+                    alert("输入不符合要求！");
+                    return;
+                }
+                formdata.append("checkcode", checkcode.val());
+                formdata.append("time", time);
+                formdata.append("cert", cert[0].files[0]);
+                $.ajax({
+                    url: "/verify",
+                    type: "POST",
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    xhrFields: {withCredentials: true},
+                    crossDomain: true
+                }).done(function (withFingerPrint){
+                    var verify = new KJUR.crypto.Signature({"alg": "SHA256withRSA" });
+                    var RSAenc = new JSEncrypt();
+                    RSAenc.setPublicKey(publickey);//纯粹用于获得key
+                    verify.init(RSAenc.getPublicKey());
+                    verify.updateString(withFingerPrint.messa);
+                    if(!verify.verify(b64tohex(withFingerPrint.fingerprint))){
+                        alert("服务器端签名出错！");
+                        return;
+                    }
+                    data = JSON.parse(new String(Base64.decode(withFingerPrint.messa)));
+                    // data = withFingerPrint.messa;
+                    var ts = data.ts;
+                    if(ts != time){
+                        alert("时间戳错误！");
+                        return;
+                    }
+                    if(data.res == 1) {
+                        alert("证书正确。");
+                        window.location.href = "nouser.html";
+                    } else if(data.res == 0) {
+                        alert(data.error);
+                        window.location.href = "verify.html";
+                    } else {
+                        alert("通讯过程出错！");
+                        return;
+                    }
+                })
+            })
+        })
+    </script>
+</head>
+<body>
+<form action="/apply" method="post" enctype="multipart/form-data">
+    <h1>在线验证</h1>
+
+    <div class="txtb" style="align-content: center">
+        <img id="checkcodeimg" src="image/origin.png" />
+        <a id="reset" style="font-size:12px">获取或重新获取验证码</a>
+    </div>
+
+    <div class="txtb">
+        <input id="checkcode" type="text" placeholder="验证码" />
+    </div>
+
+    <div class="txtb">
+        <label style="alignment:center;font-size:15px;color:darkgrey">请选择证书文件</label>
+        <input align="center" type="file" id="cert" name="cert" style="width:200px" />
+    </div>
+
+    <input type="button" class="logbtn" id="button" name="button" value="验证" style="font-size:20px; color:#ffffff">
+
+    <div class="bottom-text">
+        <a href="nouser.html">返回</a>
+    </div>
+</form>
+</body>
+</html>

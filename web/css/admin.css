@@ -1,0 +1,63 @@
+*{
+    margin: 0;
+    padding: 0;
+    text-decoration: none ;
+    font-family: 微软雅黑;
+}
+
+body{
+    min-height: 100px;
+    background: white;
+}
+
+table{
+    width: 900px;
+    height: 300px;
+    padding: 0px 0px;
+    border-radius:10px;
+    position:absolute ;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.op-button{
+    border:none;
+    background-color: white;
+}
+
+.op-button:hover{
+    border:2px solid #2966c1;
+    font-size:larger;
+}
+
+.logout-button,.mdfpsw-button{
+    border: none;
+    border-radius: 15px;
+    width:30px;
+    height:30px;
+    position:absolute;
+    color:white;
+    background:limegreen;
+}
+
+.logout-button:hover, .mdfpsw-button:hover{
+    background-color:grey;
+    cursor:pointer;
+}
+
+img:hover{
+    background-color: black;
+    cursor: pointer;
+}
+
+.circleImg{
+    border-radius: 75px;
+    width: 150px;
+    height: 150px;
+    /*background-color: gray;*/
+    border: 2px solid orange;
+}
+
+
+

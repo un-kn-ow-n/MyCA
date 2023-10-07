@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>证书查询</title>
+    <link rel="stylesheet" href="css/query.css">
+    <link rel="icon" href="image/query.png">
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script>
+        $(function (){
+            $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+        })
+
+        $(function (){
+            $("#reset").click(function (){
+                $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+            })
+        })
+
+        function check(){
+            var reg1 = /^[A-Za-z]{1,10}$/;
+            var reg3 = /^[A-Za-z0-9]{4}$/;
+            var result = reg1.test($("#C").val()) && reg1.test($("#S").val()) && reg1.test($("#L").val()) && reg1.test($("#CN").val()) && reg3.test($("#checkcode").val());
+            if(!result){
+                alert("输入不符合要求！");
+            }
+            return result;
+        }
+    </script>
+</head>
+<body>
+    <form action="/query" method="post" onsubmit="return check()">
+        <h1>证书查询</h1>
+
+        <div class="txtb" style="align-content: center">
+            <img id="checkcodeimg" name="checkcodeimg" src="image/origin.png" />
+            <a id="reset" style="font-size:12px">获取或重新获取验证码</a>
+        </div>
+
+        <div class="txtb">
+            <input id="checkcode" name="checkcode" type="text" placeholder="验证码" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="C" name="C" placeholder="国家，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="S" name="S" placeholder="省份，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="L" name="L" placeholder="城市，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="CN" name="CN" placeholder="申请者，1-10位大小写字母" />
+        </div>
+
+        <input type="submit" class="logbtn" id="button" name="button" value="确认查询" style="font-size:20px; color:#ffffff">
+
+        <div class="bottom-text">
+            <a href="nouser.html">返回</a>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,12 @@
+[INFO ][2020-12-29 14:26:28] class org.apache.log4j.Logger: info信息
+[WARN ][2020-12-29 14:26:28] class org.apache.log4j.Logger: warn信息
+[ERROR][2020-12-29 14:26:28] class org.apache.log4j.Logger: error信息
+[FATAL][2020-12-29 14:26:28] class org.apache.log4j.Logger: fatal信息
+[INFO ][2020-12-29 15:07:03] class org.apache.log4j.Logger: info信息
+[WARN ][2020-12-29 15:07:03] class org.apache.log4j.Logger: warn信息
+[ERROR][2020-12-29 15:07:03] class org.apache.log4j.Logger: error信息
+[FATAL][2020-12-29 15:07:03] class org.apache.log4j.Logger: fatal信息
+[INFO ][2020-12-29 15:16:09] Log4jTest.java info信息
+[WARN ][2020-12-29 15:16:09] Log4jTest.java warn信息
+[ERROR][2020-12-29 15:16:09] Log4jTest.java error信息
+[FATAL][2020-12-29 15:16:09] Log4jTest.java fatal信息

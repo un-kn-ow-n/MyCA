@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>证书管理</title>
+    <link rel="icon" href="image/read.png" />
+    <link rel="stylesheet" href="css/read.css" />
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/jsencrypt.js"></script>
+    <script src="js/crypto-js/crypto-js.js"></script>
+    <script src="js/base64.js"></script>
+    <script src="js/AES.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
+    <script>
+        var publickey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAioCslqlD6fXtBDvnvAyIo3VlqjbYEdf1gl/piZ7DNLB6wL4xrQerNNXQ83gzMsij64LkPHjaChY4F+vmFDl3JOJJeSzB20NK9NQ6ifQgVD9iFyBtuiaYSj/KtWFRWjXXtoJEu1OzMvliaGxOrZRTYr0d2S74JcxQHKVQGvajzKo4EaAgyai7R9jFL0gK7/SdX2t+dtTGL7ocxoMcoh5+ivbaZTjMv0Uu6ARfAnFRpDwxDfZyTn7YQxqlsaHrAaHG8jeBL1Rsip+H5CINnOApOnKNbiuxx9if7G+W+fO26iqYWUoBDAFoDpjJecQr474lyHU6hNywVzi4MiZKGcO6mwIDAQAB";
+
+        $(function (){
+            $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+        })
+
+        $(function (){
+            $("#reset").click(function (){
+                $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+            })
+        })
+
+        $(function(){
+            var button = $("#button");
+            button.click(function (){
+                var password = $("#password").val();
+                var checkcode = $("#checkcode").val();
+                var option = $("#option").val();
+                var serial = $("#serial").val();
+                if(!check()){
+                    alert("输入不符合要求！");
+                    return;
+                }
+
+                if(option == 1){
+                    var content =
+                        {
+                            "password": CryptoJS.SHA256(password).toString(),
+                            "checkcode": checkcode,
+                            "time": (new Date()).getTime()
+                        };
+                    var keyStr = genAESKey(16);
+                    var encoded = AESencrypt(JSON.stringify(content), keyStr);
+                    var RSAenc = new JSEncrypt();
+                    RSAenc.setPublicKey(publickey);
+                    var keyEncoded = RSAenc.encrypt(keyStr);
+                    $.ajax({
+                        url: "/rootread",
+                        type: "POST",
+                        data: "encoded=" + encoded + "&keyEncoded=" + keyEncoded,
+                        dataType: "json",
+                        xhrFields: {withCredentials: true},
+                        crossDomain: true
+                    }).done(function (EaS){
+                        var verify = new KJUR.crypto.Signature({"alg": "SHA256withRSA" });
+                        verify.init(RSAenc.getPublicKey());
+                        verify.updateString(EaS.encoded);
+                        if(!verify.verify(b64tohex(EaS.fingerprint))){
+                            alert("服务器端签名出错！");
+                            return;
+                        }
+                        data = JSON.parse(AESdecrypt(EaS.encoded, keyStr));
+                        if(data.res == 1) {
+                            var certificates = data.certificates;
+                            var s = "";
+                            for (var i = 0; i < certificates.length; i++) {
+                                s +=    "<form action='#'>" +
+                                            "<input class='btn' disabled='true' type='submit' value='NO." + (i + 1) + " " + certificates[i] + "' />" +
+                                        "</form>";
+                            }
+                            s = "<div id='show'>" + s + "</div>";
+                            s +=   "<div class='back-text'>" +
+                                "<a href=\"admin.html\">返回</a>" +
+                                "</div>";
+                            $("#test").replaceWith(s);
+                        } else if (data.res == 0) {
+                            alert(data.error);
+                            window.location.href = "certmanage.html";
+                        } else if (data.res == -1) {
+                            alert(data.error);
+                            window.location.href = "/logout";
+                        } else {
+                            alert("通讯过程出错！");
+                            return;
+                        }
+                    })
+                } else if (option == 2){
+                    var reg1 = /^[0-9]{13}$/;
+                    if(!reg1.test(serial)){
+                        alert("输入不符合要求！");
+                        return;
+                    }
+                    var content =
+                        {
+                            "password": CryptoJS.SHA256(password).toString(),
+                            "checkcode": checkcode,
+                            "serial": serial,
+                            "time": (new Date()).getTime()
+                        };
+                    var keyStr = genAESKey(16);
+                    var encoded = AESencrypt(JSON.stringify(content), keyStr);
+                    var RSAenc = new JSEncrypt();
+                    RSAenc.setPublicKey(publickey);
+                    var keyEncoded = RSAenc.encrypt(keyStr);
+                    $.ajax({
+                        url: "/rootdelete",
+                        type: "POST",
+                        data: "encoded=" + encoded + "&keyEncoded=" + keyEncoded,
+                        dataType: "json",
+                        xhrFields: {withCredentials: true},
+                        crossDomain: true
+                    }).done(function (EaS){
+                        var verify = new KJUR.crypto.Signature({"alg": "SHA256withRSA" });
+                        verify.init(RSAenc.getPublicKey());
+                        verify.updateString(EaS.encoded);
+                        if(!verify.verify(b64tohex(EaS.fingerprint))){
+                            alert("服务器端签名出错！");
+                            return;
+                        }
+                        data = JSON.parse(AESdecrypt(EaS.encoded, keyStr));
+
+                        if(data.res == 1) {
+                            alert("证书删除成功。");
+                            window.location.href = "admin.html";
+                        } else if (data.res == 0) {
+                            alert(data.error);
+                            window.location.href = "certmanage.html";
+                        } else if (data.res == -1) {
+                            alert(data.error);
+                            window.location.href = "/logout";
+                        } else {
+                            alert("通讯过程出错！");
+                            return;
+                        }
+                    })
+                } else {
+                    alert("无此操作");
+                    return;
+                }
+            });
+        })
+
+        $(function (){
+            var option = $("#option");
+            var serial = $("#serial");
+            option.change(function (){
+                if(option.val() != 2){
+                    serial.attr("type", "hidden");
+                    serial.val("");
+                } else {
+                    serial.attr("type", "text");
+                }
+            })
+        })
+
+        function check(){
+            var reg2 = /^[A-Za-z0-9]{5,15}$/;
+            var reg3 = /^[A-Za-z0-9]{4}$/;
+            return reg2.test($("#password").val()) && reg3.test($("#checkcode").val());
+        }
+    </script>
+
+</head>
+<body>
+<div id="test">
+    <form id="confirm">
+        <h1>证书管理</h1>
+
+        <div class="txtb">
+            <input type="password" id="password" name="password" placeholder="密码，5-15位大小写字母、数字" />
+        </div>
+
+        <div class="txtb" style="align-content: center">
+            <img id="checkcodeimg" src="image/origin.png" />
+            <a id="reset" style="font-size:12px">获取或重新获取验证码</a>
+        </div>
+
+        <div class="txtb">
+            <input id="checkcode" type="text" placeholder="验证码" />
+        </div>
+
+        <div class="txtb">
+            <input id="option" type="text" placeholder="选项：1查看 2删除" />
+        </div>
+
+        <div class="txtb">
+            <input id="serial" type="hidden" placeholder="要删除的证书的序列号，13位数字" />
+        </div>
+
+        <input type="button" class="logbtn" id="button" name="button" value="确认" style="font-size:20px; color:#ffffff">
+
+        <div class="bottom-text">
+            <a href="admin.html">返回</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

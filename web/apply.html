@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>证书申请</title>
+    <link rel="stylesheet" href="css/apply.css">
+    <link rel="icon" href="image/apply.png">
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/jsencrypt.js"></script>
+    <script src="js/crypto-js/crypto-js.js"></script>
+    <script src="js/base64.js"></script>
+    <script src="js/AES.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
+    <script>
+        var pk = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAioCslqlD6fXtBDvnvAyIo3VlqjbYEdf1gl/piZ7DNLB6wL4xrQerNNXQ83gzMsij64LkPHjaChY4F+vmFDl3JOJJeSzB20NK9NQ6ifQgVD9iFyBtuiaYSj/KtWFRWjXXtoJEu1OzMvliaGxOrZRTYr0d2S74JcxQHKVQGvajzKo4EaAgyai7R9jFL0gK7/SdX2t+dtTGL7ocxoMcoh5+ivbaZTjMv0Uu6ARfAnFRpDwxDfZyTn7YQxqlsaHrAaHG8jeBL1Rsip+H5CINnOApOnKNbiuxx9if7G+W+fO26iqYWUoBDAFoDpjJecQr474lyHU6hNywVzi4MiZKGcO6mwIDAQAB";
+        $(function (){
+            $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+        })
+
+        $(function (){
+            $("#reset").click(function (){
+                $("#checkcodeimg").attr("src", "/checkcode?seed=" + (new Date()).getTime());
+            })
+        })
+
+        function check(){
+            var reg1 = /^[A-Za-z]{1,10}$/;
+            var reg2 = /^[A-Za-z0-9]{5,15}$/;
+            var reg3 = /^[A-Za-z0-9]{4}$/;
+            return reg1.test($("#C").val()) && reg1.test($("#S").val()) && reg1.test($("#L").val()) && reg1.test($("#CN").val()) && reg2.test($("#password").val()) && reg3.test($("#checkcode").val());
+        }
+
+        $(function (){
+            var button = $("#button");
+            button.click(function (){
+                var password = $("#password");
+                var checkcode = $("#checkcode");
+                var C = $("#C");
+                var S = $("#S");
+                var L = $("#L");
+                var CN = $("#CN");
+                var publickey = $("#publickey");
+                if(!check()){x
+                    alert("输入不符合要求！");
+                    return;
+                }
+                var content =
+                    {
+                        "password": CryptoJS.SHA256(password.val()).toString(),
+                        "checkcode": checkcode.val(),
+                        "C": C.val(),
+                        "S": S.val(),
+                        "L": L.val(),
+                        "CN": CN.val(),
+                        "time": (new Date()).getTime()
+                    };
+                var keyStr = genAESKey(16);
+                var encoded = AESencrypt(JSON.stringify(content), keyStr);
+                var RSAenc = new JSEncrypt();
+                RSAenc.setPublicKey(pk);
+                var keyEncoded = RSAenc.encrypt(keyStr);
+                var formdata = new FormData();
+                formdata.append("encoded", encoded);
+                formdata.append("keyEncoded", keyEncoded);
+                formdata.append("publickey", publickey[0].files[0]);
+                $.ajax({
+                    url: "/apply",
+                    type: "POST",
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    xhrFields: {withCredentials: true},
+                    crossDomain: true
+                }).done(function (EaS){
+                    var verify = new KJUR.crypto.Signature({"alg": "SHA256withRSA" });
+                    verify.init(RSAenc.getPublicKey());
+                    verify.updateString(EaS.encoded);
+                    if(!verify.verify(b64tohex(EaS.fingerprint))){
+                        alert("服务器端签名出错！");
+                        return;
+                    }
+                    data = JSON.parse(AESdecrypt(EaS.encoded, keyStr));
+                    if(data.res == 1) {
+                        alert("证书申请成功。");
+                        window.location.href = "certificate.html";
+                    } else if(data.res == 0) {
+                        alert(data.error);
+                        window.location.href = "apply.html";
+                    } else if(data.res == -1){
+                        alert(data.error);
+                        window.location.href="/logout";
+                    } else {
+                        alert("通讯过程出错！");
+                        return;
+                    }
+                })
+            })
+        })
+    </script>
+</head>
+<body>
+    <form action="/apply" method="post" enctype="multipart/form-data">
+        <h1>证书申请</h1>
+
+        <div class="txtb">
+            <input type="password" id="password" name="password" placeholder="当前用户密码，5-15位大小写字母、数字" />
+        </div>
+
+        <div class="txtb" style="align-content: center">
+            <img id="checkcodeimg" src="image/origin.png" />
+            <a id="reset" style="font-size:12px">获取或重新获取验证码</a>
+        </div>
+
+        <div class="txtb">
+            <input id="checkcode" type="text" placeholder="验证码" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="C" name="C" placeholder="国家，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="S" name="S" placeholder="省份，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="L" name="L" placeholder="城市，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <input type="text" id="CN" name="CN" placeholder="申请者，1-10位大小写字母" />
+        </div>
+
+        <div class="txtb">
+            <label style="alignment:center;font-size:15px;color:darkgrey">请选择公钥文件</label>
+            <input align="center" type="file" id="publickey" name="publickey" style="width:200px" />
+        </div>
+
+        <input type="button" class="logbtn" id="button" name="button" value="申请" style="font-size:20px; color:#ffffff">
+
+        <div class="bottom-text">
+            <a href="certificate.html">返回</a>
+        </div>
+    </form>
+</body>
+</html>

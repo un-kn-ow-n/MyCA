@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>认证中心-管理员界面</title>
+    <link rel="stylesheet" href="css/certificate.css"/>
+    <link rel="icon" href="image/favicon.ico"/>
+</head>
+<body>
+    <button class="logout-button" style="right:60px;top:60px" onclick="window.location.href='/logout'">
+        登出
+    </button>
+    <table>
+        <tr>
+            <td align="center" height="150">
+                <img class="circleImg" src="image/user.png" width="150" height="150" onclick="window.location.href='usermanage.html'"/>
+                <img class="circleImg" src="image/read.png" width="150" height="150" onclick="window.location.href='certmanage.html'"/>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" height="50">
+                <button class="op-button" style="width:150px" onclick="window.location.href='usermanage.html'">用户管理</button>
+                <button class="op-button" style="width:150px" onclick="window.location.href='certmanage.html'">证书管理</button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

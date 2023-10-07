@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>认证中心-用户界面</title>
+    <link rel="stylesheet" href="css/certificate.css"/>
+    <link rel="icon" href="image/favicon.ico"/>
+</head>
+<body>
+<button class="logout-button" style="right:60px;top:60px" onclick="window.location.href='/logout'">
+    登出
+</button>
+<button class="mdfpsw-button" style="right:60px;top:110px" onclick="window.location.href='modifypsw.html'">
+    改密
+</button>
+<table>
+    <tr>
+        <td align="center" height="150">
+            <img class="circleImg" src="image/apply.png" width="150" height="150" onclick="window.location.href='apply.html'"/>
+            <img class="circleImg" src="image/read.png" width="150" height="150" onclick="window.location.href='read.html'"/>
+<!--            <img class="circleImg" src="image/query.png" width="150" height="150" onclick="window.location.href='/query'"/>-->
+            <img class="circleImg" src="image/delete.png" width="150" height="150" onclick="window.location.href='/delete'"/>
+<!--            <img class="circleImg" src="image/verify.png" width="150" height="150" onclick="window.location.href='/verify'"/>-->
+        </td>
+    </tr>
+    <tr>
+        <td align="center" height="50">
+            <button class="op-button" style="width:150px" onclick="window.location.href='apply.html'">申&nbsp;&nbsp;请</button>
+            <button class="op-button" style="width:150px" onclick="window.location.href='read.html'">查&nbsp;&nbsp;看</button>
+<!--            <button class="op-button" style="width:150px" onclick="window.location.href='/query'">查&nbsp;&nbsp;询</button>-->
+            <button class="op-button" style="width:150px" onclick="window.location.href='/delete'">撤&nbsp;&nbsp;销</button>
+<!--            <button class="op-button" style="width:150px" onclick="window.location.href='/verify'">验 证</button>-->
+        </td>
+    </tr>
+</table>
+</body>
+</html>

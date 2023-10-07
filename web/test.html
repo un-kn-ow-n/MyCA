@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jsencrypt.js"></script>
+    <script src="js/base64.js"></script>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/crypto-js/crypto-js.js"></script>
+    <script src="js/AES.js"></script>
+    <script>
+            $(function encrypt() {
+                // var password = "hello??!!!@";
+                // var enc = new JSEncrypt();
+                //     // var publickey = "-----BEGIN PUBLIC KEY-----MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6swwGJZX8jqfPlFvVtvR6Ve1V\n" +
+                //     // "YDXwAgEQqUwERr6MyZYOREcoIFPFsLPBQmGqtCNvvSvXivkHiEWN+znacS49HMCt\n" +
+                //     //     "CvRa0iHeKdJd+IqbZGtjzPSkEqOnYIxHdAnH5xuqub7peft+oWpM/m9tYSLsf0Ij\n" +
+                //     // "u032sV+hbC76wCT8UwIDAQAB-----END PUBLIC KEY-----";
+                // var publickey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAioCslqlD6fXtBDvnvAyIo3VlqjbYEdf1gl/piZ7DNLB6wL4xrQerNNXQ83gzMsij64LkPHjaChY4F+vmFDl3JOJJeSzB20NK9NQ6ifQgVD9iFyBtuiaYSj/KtWFRWjXXtoJEu1OzMvliaGxOrZRTYr0d2S74JcxQHKVQGvajzKo4EaAgyai7R9jFL0gK7/SdX2t+dtTGL7ocxoMcoh5+ivbaZTjMv0Uu6ARfAnFRpDwxDfZyTn7YQxqlsaHrAaHG8jeBL1Rsip+H5CINnOApOnKNbiuxx9if7G+W+fO26iqYWUoBDAFoDpjJecQr474lyHU6hNywVzi4MiZKGcO6mwIDAQAB";
+                // enc.setPublicKey(publickey);
+                // var encoded = enc.encrypt(password);
+                // console.log(encoded);
+                // var dec = new JSEncrypt();
+                // var privatekey = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCKgKyWqUPp9e0EO+e8DIijdWWqNtgR1/WCX+mJnsM0sHrAvjGtB6s01dDzeDMyyKPrguQ8eNoKFjgX6+YUOXck4kl5LMHbQ0r01DqJ9CBUP2IXIG26JphKP8q1YVFaNde2gkS7U7My+WJobE6tlFNivR3ZLvglzFAcpVAa9qPMqjgRoCDJqLtH2MUvSArv9J1fa3521MYvuhzGgxyiHn6K9tplOMy/RS7oBF8CcVGkPDEN9nJOfthDGqWxoesBocbyN4EvVGyKn4fkIg2c4Ck6co1uK7HH2J/sb5b587bqKphZSgEMAWgOmMl5xCvjviXIdTqE3LBXOLgyJkoZw7qbAgMBAAECggEAGEhK+fcfIwuszEs8a6m+4vmYI2mOJEK6lmr+ZNRi4P/35Yby6qUnjRHXmnf+ce7fXlEKdtexUodmujrvkagpjVvnCcmhCzIXGCmFQd59NIgQSIG0+yf9Fzdr8LTpMGm0MhlQt48LIeq7KBelC6WvoOYLL6KeevIBMaSCENghC6afzOLSjfS+bh9UWV17K6Qn/pVhKxUoHY3LtEujAsVQN1oEfpMvKvcTHA0K5x4Rp/5/OG46IBBZxMNzH+gCc8MyIVddzpD2OsVvZfTpZMlngbbtg99RbmSJGGUs7vZHPPzJ5FHxWiEWCM1d0cDoPtu8RU3XK1kiBVOfvx19jpQEYQKBgQD2ymASfNkuFReonz4402uJZQsEN+HBUCHCCDym2tFbDg5YXjXFo8EiqpmPa4ZoozgdENRGptt4oeWFMdbIpSv3maCdwjqxeKNolkiwvEXZqSAutVxmFWkGJ0EY4hal/Hz0LhnjfOcbg9nVUA2kCw+EqHjkYGqqXvP5vxEbrwZnkwKBgQCPq88yVQaH1OpRzAVDfi63rUGxFu0+eWt/oycPdWRVKHX9q2cSYMHlZxPw9jX6M/H1n1iRBgG2OwDQwBGqXWdf7tBj8KumCyywfuc8T3OUyivXpCjgtrboqodFocu6Rk75p9PLHthYh/8bZVGZ5gz7vOF0upuF7/GR9jJafFm12QKBgQCOEynF2uwo1Gm/YJWwnz48Zdg2wHkOEjStAJLyN+zor6ngg7QPKNvKOk6XO36whK6MRSD/35Vf2ExLJssQzc4HCAFocOXbP6lLT6FfZbQMv4nQegZMmqzQpw6Z5abGPhotdNDgnwppU7m3TRPdSaTQaTDXwQ4HMQzhzXZq6pMUUwKBgDjdJJXkR0Btygxz9sVe5Pi37187Fs16W0zac3RP31VBPWoYdCQ2/adhY+gkWvrbonG4DuLfgL/ynIEC9Dr82xSCPiLAN//xPk/g+n7JZ5LFbhLcm31NdBmknQO3ZR4mA84WWeJ0I+budM8QC/sgrZTZjlaYIUQi0vcVfZqIyy0JAoGABOvJS/c5/E5MmNputSvvYjOpg58LT5j/WyVS2UH71R1FLtlQbCaBT7xYS3uxSwEKKZqw9thhZLoLI8DUf4lbBHLjulKHNGdtmyiv1pPIhZ7L3MLAogCqCPJtfn78zMhjLV40ii5f+1HEQUIPHrUPcuKeP804MqODqERr+qlIiKE=";
+                // dec.setPrivateKey(privatekey);
+                // console.log(dec.decrypt(encoded));
+                // })
+                console.log(genAESKey(9));
+            })
+    </script>
+</head>
+<body>
+
+</body>
+</html>
